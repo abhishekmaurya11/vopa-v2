@@ -41,10 +41,48 @@
 // });
 
 
+// const ffmpeg = require('fluent-ffmpeg');
+// const fs = require('fs');
+// const path = require('path');
+
+
+// module.exports = async () => {
+//   const inputDir = path.join(__dirname, 'bossimg');
+//   const outputDir = path.join(__dirname, 'cropped');
+
+//   // Create output directory if not exists
+//   if (!fs.existsSync(outputDir)) {
+//     fs.mkdirSync(outputDir);
+//   }
+
+//   const supportedExtensions = ['.jpg', '.jpeg', '.png'];
+
+//   fs.readdirSync(inputDir).forEach((file) => {
+//     const ext = path.extname(file).toLowerCase();
+//     if (!supportedExtensions.includes(ext)) return;
+
+//     const inputPath = path.join(inputDir, file);
+//     const outputPath = path.join(outputDir, file);
+
+//     ffmpeg(inputPath)
+//       .videoFilters('crop=in_w:in_h*0.9:0:0')
+//       .on('error', (err) => {
+//         console.error(`❌ Error processing ${file}: ${err.message}`);
+//       })
+//       .on('end', () => {
+//         console.log(`✅ Cropped ${file} successfully.`);
+//       })
+//       .save(outputPath);
+//   });
+
+
+//   return;
+// };
+
+
 const ffmpeg = require('fluent-ffmpeg');
 const fs = require('fs');
 const path = require('path');
-
 
 module.exports = async () => {
   const inputDir = path.join(__dirname, 'bossimg');
@@ -56,26 +94,27 @@ module.exports = async () => {
   }
 
   const supportedExtensions = ['.jpg', '.jpeg', '.png'];
+  const files = fs.readdirSync(inputDir).filter(file => supportedExtensions.includes(path.extname(file).toLowerCase()));
 
-  fs.readdirSync(inputDir).forEach((file) => {
-    const ext = path.extname(file).toLowerCase();
-    if (!supportedExtensions.includes(ext)) return;
+  const tasks = files.map(file => {
+    return new Promise((resolve, reject) => {
+      const inputPath = path.join(inputDir, file);
+      const outputPath = path.join(outputDir, file);
 
-    const inputPath = path.join(inputDir, file);
-    const outputPath = path.join(outputDir, file);
-
-    ffmpeg(inputPath)
-      .videoFilters('crop=in_w:in_h*0.9:0:0')
-      .on('error', (err) => {
-        console.error(`❌ Error processing ${file}: ${err.message}`);
-      })
-      .on('end', () => {
-        console.log(`✅ Cropped ${file} successfully.`);
-      })
-      .save(outputPath);
+      ffmpeg(inputPath)
+        .videoFilters('crop=in_w:in_h*0.9:0:0')
+        .on('error', (err) => {
+          console.error(`❌ Error processing ${file}: ${err.message}`);
+          reject(err);
+        })
+        .on('end', () => {
+          console.log(`✅ Cropped ${file} successfully.`);
+          resolve();
+        })
+        .save(outputPath);
+    });
   });
 
-
-  return;
+  await Promise.all(tasks); // wait until all images are cropped
+  console.log('✅ All images cropped successfully!');
 };
-
