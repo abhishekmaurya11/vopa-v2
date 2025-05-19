@@ -7,10 +7,10 @@ import imgcrp from './croptime.js';
 // import vidimg from './imgvideo.js';
 import finlvid from './final _video.js'
 import alen from './audiolen.js';
-export default async () => {
+export default async (prominput) => {
 
     // content  gen code is here
-    const rre = await text_gen('create random story of exact 100 words on the sceret mission science fiction based and the hero of the story if agent mike and please generate response in plain english no any special characters or any comma or full stop or punctuation i think you got it now go');
+    const rre = await text_gen(prominput);
     console.log(rre);
 
     await audioCli(`${rre}`);

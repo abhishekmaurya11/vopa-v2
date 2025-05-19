@@ -83,7 +83,7 @@
 
 import axios from 'axios';
 
-const apiKey = `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`; // Your key, securely stored
+const apiKey = `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`; // Your key, securely stored
 
 const headers = {
   'Authorization': `Bearer ${apiKey}`,
